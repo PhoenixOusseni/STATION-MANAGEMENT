@@ -183,7 +183,7 @@
                     {{-- Section Rapports --}}
                     <div class="sidenav-menu-heading">RAPPORTS</div>
 
-                    <a class="nav-link collapsed" href="{{ route('dashboard') }}">
+                    <a class="nav-link collapsed" href="{{ route('statistiques.index') }}">
                         <div class="nav-link-icon"><i data-feather="bar-chart-2"></i></div>
                         Statistiques
                     </a>

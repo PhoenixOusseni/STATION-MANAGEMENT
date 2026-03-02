@@ -15,6 +15,7 @@ use App\Http\Controllers\SessionVenteController;
 use App\Http\Controllers\JaugeageController;
 use App\Http\Controllers\PompeController;
 use App\Http\Controllers\PistoletController;
+use App\Http\Controllers\StatistiqueController;
 
 // Routes publiques
 Route::get('/', [PageController::class, 'home'])->name('login');
@@ -48,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     // Gestion des Commandes
     Route::resource('commandes', CommandeController::class);
     Route::post('commandes/{commande}/statut', [CommandeController::class, 'updateStatut'])->name('commandes.updateStatut');
+    Route::get('commandes/{commande}/print', [CommandeController::class, 'print'])->name('commandes.print');
 
     // Gestion des Entrées (Réceptions)
     Route::resource('entrees', EntreeController::class);
@@ -64,6 +66,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Jaugeages
     Route::resource('jaugeages', JaugeageController::class)->only(['index', 'create', 'store', 'show']);
+
+    // Statistiques
+    Route::get('statistiques', [StatistiqueController::class, 'index'])->name('statistiques.index');
 
     // Gestion des Utilisateurs (Admin et Gestionnaire)
     Route::resource('users', UserController::class);

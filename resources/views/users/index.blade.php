@@ -45,6 +45,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Nom Complet</th>
+                            <th>Login</th>
                             <th>Email</th>
                             <th>Rôle</th>
                             <th>Station</th>
@@ -67,6 +68,7 @@
                                     </div>
                                 </div>
                             </td>
+                            <td>{{ $user->login }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
                                 @switch($user->role)

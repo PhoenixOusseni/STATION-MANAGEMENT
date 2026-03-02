@@ -167,6 +167,26 @@
                             </div>
                         </div>
                     @endif
+
+                    <div class="card mt-4">
+                        <div class="card-header bg-light text-dark">Action</div>
+                        <div class="card-body">
+                            <a href="{{ route('commandes.print', $commande) }}" target="_blank" class="btn btn-success btn-sm w-100">
+                                <i data-feather="printer" class="me-2"></i>&nbsp; Imprimer la commande
+                            </a>
+                            <a href="{{ route('commandes.edit', $commande) }}" class="btn btn-1 btn-sm w-100 mt-2">
+                                <i data-feather="edit" class="me-2"></i>&nbsp; Modifier la commande
+                            </a>
+                            <form action="{{ route('commandes.destroy', $commande) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm w-100 mt-2"
+                                    onclick="return confirm('Êtes-vous sûr de supprimer cette commande ?')">
+                                    <i data-feather="trash-2" class="me-2"></i>&nbsp; Supprimer la commande
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

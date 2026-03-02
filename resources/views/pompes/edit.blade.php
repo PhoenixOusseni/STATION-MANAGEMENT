@@ -43,12 +43,11 @@
                                 <div class="mb-3">
                                     <label class="form-label">Cuve de rattachement <span class="text-danger">*</span></label>
                                     <select name="cuve_id" class="form-select @error('cuve_id') is-invalid @enderror" required>
-                                        <option value="">-- Sélectionner une cuve --</option>
+                                        <option value="" disabled>-- Sélectionner une cuve --</option>
                                         @foreach($cuves as $cuve)
                                             <option value="{{ $cuve->id }}"
                                                 {{ old('cuve_id', $pompe->cuve_id) == $cuve->id ? 'selected' : '' }}>
                                                 {{ $cuve->nom }} — {{ $cuve->carburant->nom }}
-                                                ({{ $cuve->station->nom ?? 'Sans station' }})
                                             </option>
                                         @endforeach
                                     </select>

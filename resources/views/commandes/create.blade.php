@@ -37,24 +37,16 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label">Station <span class="text-danger">*</span></label>
-                                        <select name="station_id"
-                                            class="form-select @error('station_id') is-invalid @enderror" required>
-                                            <option value="">-- Sélectionner --</option>
-                                            @foreach ($stations as $station)
-                                                <option value="{{ $station->id }}"
-                                                    {{ old('station_id') == $station->id ? 'selected' : '' }}>
-                                                    {{ $station->nom }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <label class="small">Station</label>
+                                        <input type="hidden" name="station_id" value="{{ auth()->user()->station_id }}">
+                                        <input type="text" class="form-control" value="{{ auth()->user()->station->nom ?? 'N/A' }}" disabled>
                                         @error('station_id')
-                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label">Carburant <span class="text-danger">*</span></label>
+                                        <label class="small">Carburant <span class="text-danger">*</span></label>
                                         <select name="carburant_id"
                                             class="form-select @error('carburant_id') is-invalid @enderror" required>
                                             <option value="">-- Sélectionner --</option>
@@ -75,7 +67,7 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-4">
-                                        <label class="form-label">Quantité (Litres) <span
+                                        <label class="small">Quantité (Litres) <span
                                                 class="text-danger">*</span></label>
                                         <input type="number" name="quantite" id="quantite"
                                             class="form-control @error('quantite') is-invalid @enderror"
@@ -86,7 +78,7 @@
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label">Prix Unitaire (FCFA) <span
+                                        <label class="small">Prix Unitaire (FCFA) <span
                                                 class="text-danger">*</span></label>
                                         <input type="number" name="prix_unitaire" id="prix_unitaire"
                                             class="form-control @error('prix_unitaire') is-invalid @enderror"
@@ -97,13 +89,13 @@
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label">Montant Total</label>
+                                        <label class="small">Montant Total</label>
                                         <input type="text" id="montant_total" class="form-control" readonly>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Fournisseur <span class="text-danger">*</span></label>
+                                    <label class="small">Fournisseur <span class="text-danger">*</span></label>
                                     <input type="text" name="fournisseur"
                                         class="form-control @error('fournisseur') is-invalid @enderror"
                                         value="{{ old('fournisseur') }}" required>
@@ -114,7 +106,7 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label">Date de Commande <span
+                                        <label class="small">Date de Commande <span
                                                 class="text-danger">*</span></label>
                                         <input type="date" name="date_commande"
                                             class="form-control @error('date_commande') is-invalid @enderror"
@@ -125,7 +117,7 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label">Date de Livraison Prévue</label>
+                                        <label class="small">Date de Livraison Prévue</label>
                                         <input type="date" name="date_livraison_prevue"
                                             class="form-control @error('date_livraison_prevue') is-invalid @enderror"
                                             value="{{ old('date_livraison_prevue') }}">

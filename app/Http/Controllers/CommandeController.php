@@ -108,4 +108,10 @@ class CommandeController extends Controller
         return redirect()->back()
             ->with('success', 'Statut de la commande mis à jour avec succès.');
     }
+
+    public function print(Commande $commande)
+    {
+        $commande->load(['station', 'carburant', 'user', 'entree']);
+        return view('commandes.print', compact('commande'));
+    }
 }

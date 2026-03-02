@@ -24,7 +24,7 @@
 
         <div class="container-xl px-4 mt-n10">
             <div class="row">
-                <div class="col-lg-7">
+                <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header bg-light text-dark">Informations du Pistolet</div>
                         <div class="card-body">
@@ -50,12 +50,11 @@
                                 <div class="mb-3">
                                     <label class="form-label">Pompe <span class="text-danger">*</span></label>
                                     <select name="pompe_id" class="form-select @error('pompe_id') is-invalid @enderror" required>
-                                        <option value="">-- Sélectionner une pompe --</option>
+                                        <option value="" disabled>-- Sélectionner une pompe --</option>
                                         @foreach($pompes as $pompe)
                                             <option value="{{ $pompe->id }}"
                                                 {{ old('pompe_id', $preselectedPompe) == $pompe->id ? 'selected' : '' }}>
                                                 {{ $pompe->nom }} — {{ $pompe->cuve->carburant->nom }}
-                                                ({{ $pompe->cuve->station->nom ?? 'Sans station' }})
                                             </option>
                                         @endforeach
                                     </select>
@@ -65,7 +64,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Pompiste assigné</label>
                                     <select name="pompiste_id" class="form-select @error('pompiste_id') is-invalid @enderror">
-                                        <option value="">-- Aucun --</option>
+                                        <option value="" disabled>-- Aucun --</option>
                                         @foreach($pompistes as $pompiste)
                                             <option value="{{ $pompiste->id }}"
                                                 {{ old('pompiste_id') == $pompiste->id ? 'selected' : '' }}>
@@ -92,6 +91,21 @@
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-light text-dark">Aide</div>
+                        <div class="card-body">
+                            <p>Remplissez les informations du pistolet. Les champs marqués d'une astérisque (<span class="text-danger">*</span>) sont obligatoires.</p>
+                            <ul>
+                                <li><strong>Nom :</strong> Le nom du pistolet (ex : Pistolet A).</li>
+                                <li><strong>Numéro :</strong> Un identifiant unique pour le pistolet (ex : P001).</li>
+                                <li><strong>Pompe :</strong> La pompe à laquelle ce pistolet est associé.</li>
+                                <li><strong>Pompiste assigné :</strong> Le pompiste responsable de ce pistolet (optionnel).</li>
+                                <li><strong>État :</strong> L'état actuel du pistolet (actif, inactif, en maintenance).</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

@@ -8,17 +8,17 @@
                     <div class="row align-items-center justify-content-between">
                         <div class="col-auto mt-4">
                             <h1 class="page-header-title">
-                                <div class="page-header-icon"><i data-feather="dollar-sign"></i></div>
+                                <div class="page-header-icon"><i data-feather="dollar-sign" class="text-white"></i></div>
                                 Nouvelle Vente
                             </h1>
-                            <p>
+                            <p class="text-white">
                                 <small>Enregistrez une nouvelle vente de carburant en sélectionnant le pistolet, la quantité
                                     vendue et le mode de paiement.</small>
                             </p>
                         </div>
                         <div class="col-12 col-md-auto mt-4">
                             <a href="{{ route('ventes.index') }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-2"></i>&nbsp; Retour à la Liste
+                                <i class="fas fa-arrow-left me-2"></i>&nbsp; Retour
                             </a>
                         </div>
                     </div>
@@ -28,29 +28,6 @@
 
         <div class="container-xl px-4 mt-n10">
 
-            {{-- Bannière statut session --}}
-            @if($sessionActive)
-                <div class="alert alert-success d-flex align-items-center mb-4">
-                    <i data-feather="play-circle" class="me-3 flex-shrink-0" style="width:20px"></i>
-                    <div>
-                        Session <strong>{{ $sessionActive->numero_session }}</strong> en cours &mdash;
-                        ouverte le {{ $sessionActive->date_debut->format('d/m/Y à H:i') }}
-                        par {{ $sessionActive->user->prenom }} {{ $sessionActive->user->nom }}.
-                        Cette vente sera automatiquement rattachée à cette session.
-                        <a href="{{ route('session_ventes.show', $sessionActive) }}" class="ms-2 alert-link">Voir la session</a>
-                    </div>
-                </div>
-            @else
-                <div class="alert alert-warning d-flex align-items-center mb-4">
-                    <i data-feather="alert-triangle" class="me-3 flex-shrink-0" style="width:20px"></i>
-                    <div>
-                        <strong>Aucune session de vente active.</strong>
-                        La vente sera enregistrée sans être rattachée à une session.
-                        <a href="{{ route('session_ventes.create') }}" class="ms-2 alert-link">Ouvrir une session</a>
-                    </div>
-                </div>
-            @endif
-
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card">
@@ -58,7 +35,7 @@
                         <div class="card-body">
                             <form action="{{ route('ventes.store') }}" method="POST">
                                 @csrf
-                                @if($sessionActive)
+                                @if ($sessionActive)
                                     <input type="hidden" name="session_vente_id" value="{{ $sessionActive->id }}">
                                 @endif
 
@@ -200,6 +177,23 @@
                 </div>
                 <div class="col-lg-4">
                     <div class="card">
+                        <div class="card-header bg-light text-dark">Information de la session</div>
+                        <div class="card-body">
+                            @if ($sessionActive)
+                                <p><strong>Session N°{{ $sessionActive->numero_session }}</strong></p>
+                                <p>Ouverte le {{ $sessionActive->date_debut->format('d/m/Y à H:i') }} par
+                                    {{ $sessionActive->user->prenom }} {{ $sessionActive->user->nom }}.</p>
+                                <p><a href="{{ route('session_ventes.show', $sessionActive) }}"
+                                        class="btn btn-sm btn-outline-primary">Voir la session</a></p>
+                            @else
+                                <p>Aucune session active. Cette vente ne sera pas rattachée à une session.</p>
+                                <p><a href="{{ route('session_ventes.create') }}"
+                                        class="btn btn-sm btn-outline-success">Ouvrir une session</a></p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
                         <div class="card-header bg-light text-dark">Aide</div>
                         <div class="card-body">
                             <p>Pour enregistrer une vente, sélectionnez d'abord le pistolet utilisé. Le prix unitaire et le

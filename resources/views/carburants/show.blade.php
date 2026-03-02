@@ -16,7 +16,9 @@
                         <a href="{{ route('carburants.edit', $carburant) }}" class="btn btn-warning btn-sm">
                             <i data-feather="edit" class="me-2"></i>Modifier
                         </a>
-                        <a href="{{ route('carburants.index') }}" class="btn btn-light btn-sm">Retour</a>
+                        <a href="{{ route('carburants.index') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </a>
                     </div>
                 </div>
             </div>
