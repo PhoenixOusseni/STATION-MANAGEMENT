@@ -66,10 +66,10 @@ class SessionVenteController extends Controller
         $request->validate([
             'date_debut'              => 'required|date',
             'observation'             => 'nullable|string',
-            'jaugeages.*.cuve_id'     => 'required|exists:cuves,id',
-            'jaugeages.*.quantite'    => 'required|numeric|min:0',
-            'index_pompes.*.pompe_id' => 'required|exists:pompes,id',
-            'index_pompes.*.index'    => 'required|numeric|min:0',
+            'jaugeages.*.cuve_id'     => 'nullable|exists:cuves,id',
+            'jaugeages.*.quantite'    => 'nullable|numeric|min:0',
+            'index_pompes.*.pompe_id' => 'nullable|exists:pompes,id',
+            'index_pompes.*.index'    => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -200,10 +200,10 @@ class SessionVenteController extends Controller
 
         $request->validate([
             'date_fin'              => 'required|date|after_or_equal:' . $sessionVente->date_debut->format('Y-m-d H:i'),
-            'jaugeages.*.cuve_id'   => 'required|exists:cuves,id',
-            'jaugeages.*.quantite'  => 'required|numeric|min:0',
-            'index_finaux.*.id'     => 'required|exists:index_pompes,id',
-            'index_finaux.*.index'  => 'required|numeric|min:0',
+            'jaugeages.*.cuve_id'   => 'nullable|exists:cuves,id',
+            'jaugeages.*.quantite'  => 'nullable|numeric|min:0',
+            'index_finaux.*.id'     => 'nullable|exists:index_pompes,id',
+            'index_finaux.*.index'  => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -231,16 +231,18 @@ class SessionVenteController extends Controller
 
             // Enregistrer les index finaux + calculer quantité vendue compteur
             foreach ($request->index_finaux ?? [] as $if) {
+                if (!isset($if['id']) || !isset($if['index']) || $if['index'] === '') continue;
+
                 $indexPompe = IndexPompe::findOrFail($if['id']);
 
-                if ((float)$if['index'] < (float)$indexPompe->index_depart) {
+                if ((float)$if['index'] > (float)$indexPompe->index_depart) {
                     DB::rollBack();
                     return redirect()->back()
-                        ->with('error', 'L\'index final ne peut pas être inférieur à l\'index de départ pour la pompe ' . $indexPompe->pompe->nom . '.')
+                        ->with('error', 'L\'index final ne peut pas être supérieur à l\'index de départ pour la pompe ' . $indexPompe->pompe->nom . '.')
                         ->withInput();
                 }
 
-                $qteVendue = (float)$if['index'] - (float)$indexPompe->index_depart;
+                $qteVendue = (float)$indexPompe->index_depart - (float)$if['index'];
 
                 $indexPompe->update([
                     'index_final'              => $if['index'],

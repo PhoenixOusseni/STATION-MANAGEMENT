@@ -56,7 +56,7 @@ class IndexPompe extends Model
     public function calculerQuantiteVendue(): float
     {
         if ($this->index_final !== null) {
-            return (float) ($this->index_final - $this->index_depart);
+            return (float) ($this->index_depart - $this->index_final);
         }
         return 0.0;
     }

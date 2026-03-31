@@ -49,18 +49,31 @@ class VenteController extends Controller
         // Session en cours pour la station de l'utilisateur
         $sessionActive = SessionVente::where('station_id', $user->station_id)
             ->where('statut', 'en_cours')
+            ->with('indexPompes')
             ->first();
 
-        return view('ventes.create', compact('pistolets', 'sessionActive'));
+        // Map pompe_id => index_depart pour la session active
+        $indexDepartMap = [];
+        if ($sessionActive) {
+            foreach ($sessionActive->indexPompes as $ip) {
+                $indexDepartMap[$ip->pompe_id] = $ip->index_depart;
+            }
+        }
+
+        return view('ventes.create', compact('pistolets', 'sessionActive', 'indexDepartMap'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'pistolet_id'      => 'required|exists:pistolets,id',
+            'index_depart'     => 'nullable|numeric|min:0',
+            'index_final'      => 'nullable|numeric|min:0',
             'quantite'         => 'required|numeric|min:0',
+            'retour_cuve'      => 'nullable|numeric|min:0',
+            'quantite_vendue'  => 'nullable|numeric|min:0',
             'prix_unitaire'    => 'required|numeric|min:0',
-            'mode_paiement'    => 'required|in:especes,carte,mobile_money,credit',
+            'mode_paiement'    => 'required|in:especes,carte,mobile_money,credit,cheque',
             'date_vente'       => 'required|date',
             'numero_ticket'    => 'nullable|string|max:255',
             'client'           => 'nullable|string|max:255',
@@ -82,7 +95,6 @@ class VenteController extends Controller
                         ->withInput();
                 }
             } else {
-                // Chercher automatiquement la session en cours
                 $session = SessionVente::where('station_id', $user->station_id)
                     ->where('statut', 'en_cours')
                     ->first();
@@ -94,22 +106,35 @@ class VenteController extends Controller
             $pistolet = Pistolet::with('pompe.cuve')->findOrFail($validated['pistolet_id']);
             $cuve = $pistolet->pompe->cuve;
 
-            // Vérifier le stock disponible
-            if ($cuve->stock_actuel < $validated['quantite']) {
+            // Quantité vendue = quantité compteur - retour cuve
+            $retourCuve      = (float) ($validated['retour_cuve'] ?? 0);
+            $quantiteCompteur = (float) $validated['quantite'];
+            $quantiteVendue  = $quantiteCompteur - $retourCuve;
+
+            if ($quantiteVendue < 0) {
                 return redirect()->back()
-                    ->with('error', 'Stock insuffisant dans la cuve.')
+                    ->with('error', 'Le retour cuve ne peut pas être supérieur à la quantité compteur.')
                     ->withInput();
             }
 
-            $validated['station_id']    = $user->station_id;
-            $validated['pompiste_id']   = $user->id;
-            $validated['numero_vente']  = 'VTE-' . date('Ymd') . '-' . str_pad(Vente::count() + 1, 5, '0', STR_PAD_LEFT);
-            $validated['montant_total'] = $validated['quantite'] * $validated['prix_unitaire'];
+            // Vérifier le stock disponible (sur la quantité réellement vendue)
+            if ($cuve->stock_actuel < $quantiteVendue) {
+                return redirect()->back()
+                    ->with('error', 'Stock insuffisant dans la cuve (stock : ' . number_format($cuve->stock_actuel, 2) . ' L, quantité vendue : ' . number_format($quantiteVendue, 2) . ' L).')
+                    ->withInput();
+            }
+
+            $validated['station_id']      = $user->station_id;
+            $validated['pompiste_id']      = $user->id;
+            $validated['numero_vente']     = 'VTE-' . date('Ymd') . '-' . str_pad(Vente::count() + 1, 5, '0', STR_PAD_LEFT);
+            $validated['retour_cuve']      = $retourCuve;
+            $validated['quantite_vendue']  = $quantiteVendue;
+            $validated['montant_total']    = $quantiteVendue * $validated['prix_unitaire'];
 
             Vente::create($validated);
 
-            // Décrémenter le stock de la cuve
-            $cuve->decrement('stock_actuel', $validated['quantite']);
+            // Décrémenter le stock de la cuve (quantité vendue seulement)
+            $cuve->decrement('stock_actuel', $quantiteVendue);
 
             DB::commit();
 
@@ -176,14 +201,18 @@ class VenteController extends Controller
         }
 
         $validated = $request->validate([
-            'pistolet_id'    => 'required|exists:pistolets,id',
-            'quantite'       => 'required|numeric|min:0',
-            'prix_unitaire'  => 'required|numeric|min:0',
-            'mode_paiement'  => 'required|in:especes,carte,mobile_money,credit',
-            'date_vente'     => 'required|date',
-            'numero_ticket'  => 'nullable|string|max:255',
-            'client'         => 'nullable|string|max:255',
-            'observation'    => 'nullable|string',
+            'pistolet_id'     => 'required|exists:pistolets,id',
+            'index_depart'    => 'nullable|numeric|min:0',
+            'index_final'     => 'nullable|numeric|min:0',
+            'quantite'        => 'required|numeric|min:0',
+            'retour_cuve'     => 'nullable|numeric|min:0',
+            'quantite_vendue' => 'nullable|numeric|min:0',
+            'prix_unitaire'   => 'required|numeric|min:0',
+            'mode_paiement'   => 'required|in:especes,carte,mobile_money,credit,cheque',
+            'date_vente'      => 'required|date',
+            'numero_ticket'   => 'nullable|string|max:255',
+            'client'          => 'nullable|string|max:255',
+            'observation'     => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -192,33 +221,45 @@ class VenteController extends Controller
             $newCuve     = $newPistolet->pompe->cuve;
             $oldCuve     = $vente->pistolet->pompe->cuve;
 
+            $retourCuve      = (float) ($validated['retour_cuve'] ?? 0);
+            $quantiteVendue  = (float) ($validated['quantite_vendue'] ?? max(0, $validated['quantite'] - $retourCuve));
+            $ancienneQteVendue = (float) $vente->quantite_vendue;
+
+            if ($quantiteVendue < 0) {
+                return redirect()->back()
+                    ->with('error', 'Le retour cuve ne peut pas être supérieur à la quantité compteur.')
+                    ->withInput();
+            }
+
             if ($vente->pistolet_id !== (int) $validated['pistolet_id']) {
                 // Pistolet changé : restaurer l'ancien stock, vérifier et décrémenter le nouveau
-                $oldCuve->increment('stock_actuel', $vente->quantite);
+                $oldCuve->increment('stock_actuel', $ancienneQteVendue);
 
-                if ($newCuve->stock_actuel < $validated['quantite']) {
+                if ($newCuve->stock_actuel < $quantiteVendue) {
                     DB::rollBack();
                     return redirect()->back()
-                        ->with('error', 'Stock insuffisant dans la nouvelle cuve.')
+                        ->with('error', 'Stock insuffisant dans la nouvelle cuve (stock : ' . number_format($newCuve->stock_actuel, 2) . ' L).')
                         ->withInput();
                 }
 
-                $newCuve->decrement('stock_actuel', $validated['quantite']);
+                $newCuve->decrement('stock_actuel', $quantiteVendue);
             } else {
-                // Même pistolet : ajuster l'écart de quantité
-                $adjustment = $validated['quantite'] - $vente->quantite;
+                // Même pistolet : ajuster l'écart de quantité vendue
+                $adjustment = $quantiteVendue - $ancienneQteVendue;
 
                 if ($adjustment > 0 && $oldCuve->stock_actuel < $adjustment) {
                     DB::rollBack();
                     return redirect()->back()
-                        ->with('error', 'Stock insuffisant dans la cuve.')
+                        ->with('error', 'Stock insuffisant dans la cuve (stock : ' . number_format($oldCuve->stock_actuel, 2) . ' L).')
                         ->withInput();
                 }
 
                 $oldCuve->increment('stock_actuel', -$adjustment);
             }
 
-            $validated['montant_total'] = $validated['quantite'] * $validated['prix_unitaire'];
+            $validated['retour_cuve']     = $retourCuve;
+            $validated['quantite_vendue'] = $quantiteVendue;
+            $validated['montant_total']   = $quantiteVendue * $validated['prix_unitaire'];
             $vente->update($validated);
 
             DB::commit();

@@ -60,8 +60,7 @@
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white fw-bold">
                                 <i data-feather="droplet" class="me-2"></i>Jaugeages Début de Session
-                                <small class="d-block fw-normal mt-1">Mesurez physiquement chaque cuve avant de commencer la
-                                    vente.</small>
+                                <small class="d-block fw-normal mt-1">Cochez les cuves à jauger. Les cuves non cochées seront ignorées.</small>
                             </div>
                             <div class="card-body">
                                 @if ($cuves->isEmpty())
@@ -73,8 +72,17 @@
                                         <div class="border rounded p-3 mb-3 bg-light">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <h6 class="mb-0">
-                                                    <span class="badge bg-info me-2">{{ $cuve->carburant->nom }}</span>
-                                                    {{ $cuve->nom }}
+                                                    <div class="form-check d-inline-flex align-items-center me-2">
+                                                        <input class="form-check-input jaugeage-toggle me-2"
+                                                            type="checkbox"
+                                                            id="jaugeage_check_{{ $index }}"
+                                                            data-target="jaugeage_fields_{{ $index }}"
+                                                            checked>
+                                                        <label class="form-check-label mb-0" for="jaugeage_check_{{ $index }}">
+                                                            <span class="badge bg-info me-1">{{ $cuve->carburant->nom }}</span>
+                                                            {{ $cuve->nom }}
+                                                        </label>
+                                                    </div>
                                                 </h6>
                                                 <small class="text-muted">
                                                     Stock théorique : <strong>{{ number_format($cuve->stock_actuel, 0) }}
@@ -82,7 +90,7 @@
                                                     / {{ number_format($cuve->capacite_max, 0) }} L
                                                 </small>
                                             </div>
-                                            <div class="row g-2">
+                                            <div class="row g-2" id="jaugeage_fields_{{ $index }}">
                                                 <div class="col-md-6">
                                                     <label class="form-label form-label-sm">Quantité mesurée (L)</label>
                                                     <input type="number" name="jaugeages[{{ $index }}][quantite]"
@@ -113,8 +121,7 @@
                         <div class="card mb-4">
                             <div class="card-header bg-success text-white fw-bold">
                                 <i data-feather="activity" class="me-2"></i>Relevés Index Départ des Pompes
-                                <small class="d-block fw-normal mt-1">Notez le compteur de chaque pompe avant le
-                                    démarrage.</small>
+                                <small class="d-block fw-normal mt-1">Cochez les pompes à relever. Les pompes non cochées seront ignorées.</small>
                             </div>
                             <div class="card-body">
                                 @if ($pompes->isEmpty())
@@ -126,13 +133,21 @@
                                         <div class="border rounded p-3 mb-3 bg-light">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <h6 class="mb-0">
-                                                    <span
-                                                        class="badge bg-success me-2">{{ $pompe->cuve->carburant->nom }}</span>
-                                                    {{ $pompe->nom }}
+                                                    <div class="form-check d-inline-flex align-items-center me-2">
+                                                        <input class="form-check-input pompe-toggle me-2"
+                                                            type="checkbox"
+                                                            id="pompe_check_{{ $index }}"
+                                                            data-target="pompe_fields_{{ $index }}"
+                                                            checked>
+                                                        <label class="form-check-label mb-0" for="pompe_check_{{ $index }}">
+                                                            <span class="badge bg-success me-1">{{ $pompe->cuve->carburant->nom }}</span>
+                                                            {{ $pompe->nom }}
+                                                        </label>
+                                                    </div>
                                                 </h6>
                                                 <small class="text-muted">Cuve : {{ $pompe->cuve->nom }}</small>
                                             </div>
-                                            <div class="row g-2">
+                                            <div class="row g-2" id="pompe_fields_{{ $index }}">
                                                 <div class="col-md-6">
                                                     <label class="form-label form-label-sm">Index départ (m³ ou L)</label>
                                                     <input type="number" name="index_pompes[{{ $index }}][index]"
@@ -188,4 +203,34 @@
             </form>
         </div>
     </main>
+
+    <script>
+        function toggleFields(checkbox) {
+            const target = document.getElementById(checkbox.dataset.target);
+            if (!target) return;
+            const inputs = target.querySelectorAll('input, textarea, select');
+            if (checkbox.checked) {
+                target.style.opacity = '1';
+                inputs.forEach(i => i.disabled = false);
+            } else {
+                target.style.opacity = '0.35';
+                inputs.forEach(i => { i.disabled = true; i.value = ''; });
+            }
+        }
+
+        document.querySelectorAll('.jaugeage-toggle, .pompe-toggle').forEach(cb => {
+            cb.addEventListener('change', () => toggleFields(cb));
+        });
+
+        // Avant soumission, retirer disabled pour que les hidden cuve_id/pompe_id passent
+        // mais vider les valeurs des champs non cochés (déjà fait par toggleFields)
+        document.querySelector('form').addEventListener('submit', function () {
+            document.querySelectorAll('.jaugeage-toggle, .pompe-toggle').forEach(cb => {
+                if (!cb.checked) {
+                    const target = document.getElementById(cb.dataset.target);
+                    if (target) target.querySelectorAll('input, textarea').forEach(i => i.disabled = false);
+                }
+            });
+        });
+    </script>
 @endsection

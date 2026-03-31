@@ -93,7 +93,7 @@
                                             </small>
                                         </td>
                                         <td>{{ $vente->pompiste->prenom }} {{ $vente->pompiste->nom }}</td>
-                                        <td>{{ number_format($vente->quantite, 2) }} L</td>
+                                        <td>{{ number_format($vente->quantite_vendue, 2) }} L</td>
                                         <td>{{ number_format($vente->prix_unitaire, 0, ',', ' ') }} FCFA</td>
                                         <td><strong>{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</strong>
                                         </td>
@@ -146,7 +146,7 @@
                                 <tfoot>
                                     <tr class="table-info">
                                         <th colspan="4" class="text-end">Total:</th>
-                                        <th>{{ number_format($ventes->sum('quantite'), 2) }} L</th>
+                                        <th>{{ number_format($ventes->sum('quantite_vendue'), 2) }} L</th>
                                         <th></th>
                                         <th colspan="3">
                                             <strong>{{ number_format($ventes->sum('montant_total'), 0, ',', ' ') }}

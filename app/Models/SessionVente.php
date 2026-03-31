@@ -80,6 +80,6 @@ class SessionVente extends Model
 
     public function quantiteTotaleVendue(): float
     {
-        return (float) $this->ventes()->sum('quantite');
+        return (float) $this->ventes()->sum('quantite_vendue');
     }
 }

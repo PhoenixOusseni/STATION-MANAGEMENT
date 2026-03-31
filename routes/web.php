@@ -16,6 +16,7 @@ use App\Http\Controllers\JaugeageController;
 use App\Http\Controllers\PompeController;
 use App\Http\Controllers\PistoletController;
 use App\Http\Controllers\StatistiqueController;
+use App\Http\Controllers\LivreJournalController;
 
 // Routes publiques
 Route::get('/', [PageController::class, 'home'])->name('login');
@@ -69,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Statistiques
     Route::get('statistiques', [StatistiqueController::class, 'index'])->name('statistiques.index');
+
+    // Livre Journal
+    Route::get('livre-journal', [LivreJournalController::class, 'index'])->name('livre_journal.index');
+    Route::get('livre-journal/print', [LivreJournalController::class, 'print'])->name('livre_journal.print');
 
     // Gestion des Utilisateurs (Admin et Gestionnaire)
     Route::resource('users', UserController::class);

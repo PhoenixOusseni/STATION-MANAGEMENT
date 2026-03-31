@@ -164,7 +164,7 @@
                                             <td>{{ $vente->numero_vente }}</td>
                                             <td>{{ $vente->date_vente->format('d/m H:i') }}</td>
                                             <td>{{ $vente->pistolet->pompe->cuve->carburant->nom }}</td>
-                                            <td class="text-end">{{ number_format($vente->quantite, 2) }}</td>
+                                            <td class="text-end">{{ number_format($vente->quantite_vendue, 2) }}</td>
                                             <td class="text-end">{{ number_format($vente->montant_total, 0, ',', ' ') }}
                                             </td>
                                             <td>

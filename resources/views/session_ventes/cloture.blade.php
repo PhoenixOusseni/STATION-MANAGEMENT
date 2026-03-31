@@ -55,7 +55,7 @@
                                     <label class="form-label">Date & Heure <span class="text-danger">*</span></label>
                                     <input type="datetime-local" name="date_fin"
                                         class="form-control @error('date_fin') is-invalid @enderror"
-                                        value="{{ old('date_fin', date('Y-m-d\TH:i')) }}" required>
+                                        value="{{ old('date_fin', date('Y-m-d\TH:i')) }}">
                                     @error('date_fin')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -95,8 +95,8 @@
                                                         name="index_finaux[{{ $i }}][index]"
                                                         class="form-control form-control-sm @error('index_finaux.' . $i . '.index') is-invalid @enderror"
                                                         value="{{ old('index_finaux.' . $i . '.index') }}"
-                                                        min="{{ $ip->index_depart }}" step="0.01"
-                                                        placeholder="ex : {{ number_format($ip->index_depart + 500, 2) }}"
+                                                        max="{{ $ip->index_depart }}" step="0.01"
+                                                        placeholder="ex : {{ number_format($ip->index_depart - 500, 2) }}"
                                                         data-depart="{{ $ip->index_depart }}"
                                                         oninput="calcQte(this)">
                                                     @error('index_finaux.' . $i . '.index')
@@ -208,7 +208,7 @@
         function calcQte(input) {
             const depart = parseFloat(input.getAttribute('data-depart')) || 0;
             const final  = parseFloat(input.value) || 0;
-            const qte    = final >= depart ? (final - depart).toFixed(2) : '-';
+            const qte    = final <= depart ? (depart - final).toFixed(2) : '-';
             const block  = input.closest('.border');
             if (block) {
                 const result = block.querySelector('.qte-result');

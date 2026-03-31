@@ -402,7 +402,7 @@
             <tr>
                 <td>Vente de carburant</td>
                 <td>{{ $vente->pistolet->pompe->cuve->carburant->nom }}</td>
-                <td>{{ number_format($vente->quantite, 2, ',', ' ') }}</td>
+                <td>{{ number_format($vente->quantite_vendue, 2, ',', ' ') }}</td>
                 <td>{{ number_format($vente->prix_unitaire, 0, ',', ' ') }}</td>
                 <td>{{ number_format($vente->montant_total, 0, ',', ' ') }}</td>
             </tr>
@@ -410,7 +410,7 @@
         <tfoot>
             <tr>
                 <td colspan="2"><strong>TOTAL</strong></td>
-                <td><strong>{{ number_format($vente->quantite, 2, ',', ' ') }} L</strong></td>
+                <td><strong>{{ number_format($vente->quantite_vendue, 2, ',', ' ') }} L</strong></td>
                 <td></td>
                 <td><strong>{{ number_format($vente->montant_total, 0, ',', ' ') }} FCFA</strong></td>
             </tr>

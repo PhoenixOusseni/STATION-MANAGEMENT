@@ -16,7 +16,11 @@ class Vente extends Model
         'session_vente_id',
         'numero_vente',
         'numero_ticket',
+        'index_depart',
+        'index_final',
         'quantite',
+        'retour_cuve',
+        'quantite_vendue',
         'prix_unitaire',
         'montant_total',
         'mode_paiement',
@@ -26,10 +30,14 @@ class Vente extends Model
     ];
 
     protected $casts = [
-        'quantite' => 'decimal:2',
-        'prix_unitaire' => 'decimal:2',
-        'montant_total' => 'decimal:2',
-        'date_vente' => 'datetime',
+        'index_depart'    => 'decimal:2',
+        'index_final'     => 'decimal:2',
+        'quantite'        => 'decimal:2',
+        'retour_cuve'     => 'decimal:2',
+        'quantite_vendue' => 'decimal:2',
+        'prix_unitaire'   => 'decimal:2',
+        'montant_total'   => 'decimal:2',
+        'date_vente'      => 'datetime',
     ];
 
     /**
